@@ -2,21 +2,24 @@ from aiogram import Router
 from aiogram.filters import Command
 from aiogram import types as ttypes
 from aiogram import F
-from config import REQUEST_LABELS
+from aiogram.fsm.context import FSMContext
+
+from config import REQUEST_LABELS, Send_Info
+
+####################################### - MASTER - #######################################
 
 masterR = Router(name="master")
-idR = Router(name="get_ID")
-infoR = Router(name="get_info")
 
 @masterR.message(Command("start")) # the /start command was sent
-async def send_welcome(msg: ttypes.Message):
+async def send_welcome(msg: ttypes.Message, state: FSMContext):
     "send a welcome message"
     await msg.answer(
         "Hello! 👋\n" \
         "I am a bot for Telegram bot developers.\n" \
         "Use /help to see the list of available commands.\n" \
         "<i>From developers, for developers</i>"
-    )
+    ) # send welcomming message
+    await state.clear() # clear the state
 
 @masterR.message(Command("help")) # the /help command was sent
 async def send_list_of_commands(msg: ttypes.Message):
@@ -24,7 +27,11 @@ async def send_list_of_commands(msg: ttypes.Message):
         "Here's the list of all features for now:\n\n" \
         "/getid - get the ID of a user, bot, group, or channel\n\n" \
         "We are constantly making this bot better, so stay tuned for updates! 🚀"
-    )
+    ) # send a list of commands
+
+####################################### - GET ID - #######################################
+
+idR = Router(name="get_ID")
 
 @idR.message(Command("getid")) # the /getid command was sent
 async def ask_whose_id(msg: ttypes.Message):
@@ -93,3 +100,51 @@ async def send_chat_id(msg: ttypes.Message):
 
     text = f"<b>{REQUEST_LABELS[req_id]} id:</b> <code>{chat_id}</code>"
     await msg.answer(text, reply_markup=ttypes.ReplyKeyboardRemove())
+
+####################################### - GET INFO - #######################################
+
+infoR = Router(name="get_info")
+
+@infoR.message(Command("getinfo")) # the /getinfo command was sent
+async def set_info_state(msg: ttypes.Message, state: FSMContext):
+    "set the state to get update"
+    await state.set_state(Send_Info.waiting_for_update)
+
+@infoR.business_message(Command("getinfo")) # the /getinfo command was sent in a business chat
+async def set_business_info_state(msg: ttypes.Message, state: FSMContext):
+    "set the state to get business update"
+    await state.set_state(Send_Info.waiting_for_business_update)
+
+@infoR.message(Send_Info.waiting_for_update) # a message when the bot is waiting for an update to be sent
+async def send_message_info(msg: ttypes.Message, state: FSMContext):
+    "send the json-formatted message update"
+    await msg.answer(
+        "<b>💬 Message received:</b>\n\n" \
+        f"<blockquote expandable><pre>{msg.json(indent=2, ensure_ascii=False)}</pre></blockquote>\n" \
+        "<b>Main info:</b>\n" \
+        "<blockquote expandable>" \
+            f"Message ID: <pre>{msg.message_id}</pre>\n" \
+            f"From: <pre>{msg.from_user.id} ({("@" + msg.from_user.username) if msg.from_user.username else msg.from_user.full_name})</pre>\n" \
+            f"Content type: <pre>{msg.content_type}</pre>\n" \
+            ("Forwarded from " + (f"<pre>{msg.forward_from.id} ({("@" + msg.forward_from.username) if msg.forward_from.username else msg.forward_from.full_name})</pre>\n") if msg.forward_from else "") + \
+        "</blockquote>"
+    )
+    await state.clear() # clear the state
+
+@infoR.business_message(Send_Info.waiting_for_update) # a business message when the bot is waiting for an update to be sent
+async def send_business_message_info(msg: ttypes.Message, state: FSMContext):
+    "send the json-formatted message update"
+    await msg.answer(
+        "<b>💬 Business message received:</b>\n\n" \
+        f"<blockquote expandable><pre>{msg.json(indent=2, ensure_ascii=False)}</pre></blockquote>\n" \
+        "<b>Main info:</b>\n" \
+        "<blockquote expandable>" \
+            f"Message ID: <pre>{msg.message_id}</pre>\n" \
+            f"Business connection ID: <pre>{msg.business_connection_id}</pre>\n" \
+            f"From: <pre>{msg.from_user.id} ({("@" + msg.from_user.username) if msg.from_user.username else msg.from_user.full_name})</pre>\n" \
+            f"Content type: <pre>{msg.content_type}</pre>\n" \
+            ("Forwarded from " + (f"<pre>{msg.forward_from.id} ({("@" + msg.forward_from.username) if msg.forward_from.username else msg.forward_from.full_name})</pre>\n") if msg.forward_from else "") + \
+        "</blockquote>"
+    )
+    await state.clear() # clear the state
+
