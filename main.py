@@ -1,12 +1,16 @@
 import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
+from aiogram.fsm.storage.memory import MemoryStorage
+
 
 from handlers import masterR, idR, infoR
 from config import BOT_TOKEN, PARSE_MODE
 
+storage = MemoryStorage()
+
 bot = Bot(BOT_TOKEN, default=DefaultBotProperties(parse_mode=PARSE_MODE))
-dp = Dispatcher()
+dp = Dispatcher(storage=storage)
 
 ########################### - MAIN - ###########################
 

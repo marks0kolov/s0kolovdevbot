@@ -3,6 +3,7 @@ from aiogram.filters import Command
 from aiogram import types as ttypes
 from aiogram import F
 from aiogram.fsm.context import FSMContext
+import json
 
 from config import REQUEST_LABELS, Send_Info
 
@@ -108,43 +109,54 @@ infoR = Router(name="get_info")
 @infoR.message(Command("getinfo")) # the /getinfo command was sent
 async def set_info_state(msg: ttypes.Message, state: FSMContext):
     "set the state to get update"
+    await msg.answer("Send me a message and I will give you all i knwo about it!")
     await state.set_state(Send_Info.waiting_for_update)
 
 @infoR.business_message(Command("getinfo")) # the /getinfo command was sent in a business chat
 async def set_business_info_state(msg: ttypes.Message, state: FSMContext):
     "set the state to get business update"
+    await msg.answer("Send me a business message and I will give you all i knwo about it!")
     await state.set_state(Send_Info.waiting_for_business_update)
 
 @infoR.message(Send_Info.waiting_for_update) # a message when the bot is waiting for an update to be sent
 async def send_message_info(msg: ttypes.Message, state: FSMContext):
     "send the json-formatted message update"
+
+    msg_json = json.dumps(msg.model_dump(mode="json"), indent=2, ensure_ascii=False)
+    from_name_tag = {("@" + msg.from_user.username) if msg.from_user.username else msg.from_user.full_name}
+    forwarded_tag = "Forwarded from " + (f"<pre>{msg.forward_from.id} ({("@" + msg.forward_from.username) if msg.forward_from.username else msg.forward_from.full_name})</pre>\n") if msg.forward_from else ""
+
     await msg.answer(
         "<b>💬 Message received:</b>\n\n" \
-        f"<blockquote expandable><pre>{msg.json(indent=2, ensure_ascii=False)}</pre></blockquote>\n" \
+        f"<blockquote expandable><pre>{msg_json}</pre></blockquote>\n" \
         "<b>Main info:</b>\n" \
         "<blockquote expandable>" \
             f"Message ID: <pre>{msg.message_id}</pre>\n" \
-            f"From: <pre>{msg.from_user.id} ({("@" + msg.from_user.username) if msg.from_user.username else msg.from_user.full_name})</pre>\n" \
+            f"From: <pre>{msg.from_user.id} ({from_name_tag})</pre>\n" \
             f"Content type: <pre>{msg.content_type}</pre>\n" \
-            ("Forwarded from " + (f"<pre>{msg.forward_from.id} ({("@" + msg.forward_from.username) if msg.forward_from.username else msg.forward_from.full_name})</pre>\n") if msg.forward_from else "") + \
+            f"{forwarded_tag}" + \
         "</blockquote>"
     )
     await state.clear() # clear the state
 
-@infoR.business_message(Send_Info.waiting_for_update) # a business message when the bot is waiting for an update to be sent
-async def send_business_message_info(msg: ttypes.Message, state: FSMContext):
-    "send the json-formatted message update"
+@infoR.business_message(Send_Info.waiting_for_business_update) # a message when the bot is waiting for an update to be sent
+async def send_message_info(msg: ttypes.Message, state: FSMContext):
+    "send the json-formatted business message update"
+
+    msg_json = json.dumps(msg.model_dump(mode="json"), indent=2, ensure_ascii=False)
+    from_name_tag = {("@" + msg.from_user.username) if msg.from_user.username else msg.from_user.full_name}
+    forwarded_tag = "Forwarded from " + (f"<pre>{msg.forward_from.id} ({("@" + msg.forward_from.username) if msg.forward_from.username else msg.forward_from.full_name})</pre>\n") if msg.forward_from else ""
+
     await msg.answer(
         "<b>💬 Business message received:</b>\n\n" \
-        f"<blockquote expandable><pre>{msg.json(indent=2, ensure_ascii=False)}</pre></blockquote>\n" \
+        f"<blockquote expandable><pre>{msg_json}</pre></blockquote>\n" \
         "<b>Main info:</b>\n" \
         "<blockquote expandable>" \
             f"Message ID: <pre>{msg.message_id}</pre>\n" \
             f"Business connection ID: <pre>{msg.business_connection_id}</pre>\n" \
-            f"From: <pre>{msg.from_user.id} ({("@" + msg.from_user.username) if msg.from_user.username else msg.from_user.full_name})</pre>\n" \
+            f"From: <pre>{msg.from_user.id} ({from_name_tag})</pre>\n" \
             f"Content type: <pre>{msg.content_type}</pre>\n" \
-            ("Forwarded from " + (f"<pre>{msg.forward_from.id} ({("@" + msg.forward_from.username) if msg.forward_from.username else msg.forward_from.full_name})</pre>\n") if msg.forward_from else "") + \
+            f"{forwarded_tag}" + \
         "</blockquote>"
     )
     await state.clear() # clear the state
-
