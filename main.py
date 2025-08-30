@@ -5,10 +5,8 @@ from aiogram.client.default import DefaultBotProperties
 from handlers import masterR, idR, infoR
 from config import BOT_TOKEN, PARSE_MODE
 
-bot = Bot(BOT_TOKEN, default=DefaultBotProperties(parse_mode = PARSE_MODE))
+bot = Bot(BOT_TOKEN, default=DefaultBotProperties(parse_mode=PARSE_MODE))
 dp = Dispatcher()
-
-REQUEST_LABELS: dict[int, str] = {}
 
 ########################### - MAIN - ###########################
 

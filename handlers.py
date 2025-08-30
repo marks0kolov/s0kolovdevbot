@@ -35,14 +35,14 @@ async def ask_whose_id(msg: ttypes.Message):
             [
                 ttypes.KeyboardButton(
                     text="👤 User",
-                    request_user=ttypes.KeyboardButtonRequestUser(request_id=REQUEST_LABELS.key(1))
+                    request_user=ttypes.KeyboardButtonRequestUser(request_id=1)
                 )
             ],
             [
                 ttypes.KeyboardButton(
                     text="🤖 Bot",
                     request_user=ttypes.KeyboardButtonRequestUser(
-                        request_id=REQUEST_LABELS.key(2),
+                        request_id=2,
                         user_is_bot=True,
                     ),
                 )
@@ -51,7 +51,7 @@ async def ask_whose_id(msg: ttypes.Message):
                 ttypes.KeyboardButton(
                     text="👥 Group",
                     request_chat=ttypes.KeyboardButtonRequestChat(
-                        request_id=REQUEST_LABELS.key(3),
+                        request_id=3,
                         chat_is_channel=False,
                     ),
                 )
@@ -60,7 +60,7 @@ async def ask_whose_id(msg: ttypes.Message):
                 ttypes.KeyboardButton(
                     text="📢 Channel",
                     request_chat=ttypes.KeyboardButtonRequestChat(
-                        request_id=REQUEST_LABELS.key(4),
+                        request_id=4,
                         chat_is_channel=True,
                     ),
                 )
