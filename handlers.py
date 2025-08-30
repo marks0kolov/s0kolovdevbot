@@ -21,8 +21,8 @@ async def send_welcome(msg: ttypes.Message):
 @masterR.message(Command("help")) # the /help command was sent
 async def send_list_of_commands(msg: ttypes.Message):
     await msg.answer(
-        "Here's the list of all features for now:\n" \
-        "- /getid - get the ID of a user, bot, group, or channel\n" \
+        "Here's the list of all features for now:\n\n" \
+        "/getid - get the ID of a user, bot, group, or channel\n\n" \
         "We are constantly making this bot better, so stay tuned for updates! 🚀"
     )
 
