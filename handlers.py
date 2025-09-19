@@ -3,9 +3,10 @@ from aiogram.filters import Command
 from aiogram import types as ttypes
 from aiogram import F, Bot
 from aiogram.fsm.context import FSMContext
+from aiogram.filters import StateFilter
 import json
 
-from config import REQUEST_LABELS, Send_Info
+from config import REQUEST_LABELS, Send_Info, GetUserInfo
 
 ####################################### - MASTER - #######################################
 
@@ -101,6 +102,56 @@ async def send_chat_id(msg: ttypes.Message):
 
     text = f"<b>{REQUEST_LABELS[req_id]} id:</b> <code>{chat_id}</code>"
     await msg.answer(text, reply_markup=ttypes.ReplyKeyboardRemove())
+
+####################################### - GET USER - #######################################
+
+userR = Router(name="get_user")
+
+@userR.message(Command("getuser")) # the /getuser command was sent
+async def ask_whose_id(msg: ttypes.Message, state: FSMContext):
+    "ask whose id to get"
+
+    await msg.answer(
+        "Send me an id and I will give you some info about the user",
+    )
+    await state.set_state(GetUserInfo.waiting_for_user_id)
+
+@userR.message(StateFilter(GetUserInfo.waiting_for_user_id))
+async def send_user_info(msg: ttypes.Message, state: FSMContext, bot: Bot):
+    "send info about the user/group/channel by ID"
+    user_id_text = msg.text.strip()
+    try:
+        user_id = int(user_id_text)
+    except ValueError:
+        await msg.answer("Please send a valid numeric ID.")
+        return
+
+    try:
+        user = await bot.get_chat(user_id)
+    except Exception as e:
+        await msg.answer(f"Could not find user/group/channel with ID <code>{user_id}</code>. Please try again.")
+        return
+
+    info_lines = [
+        f"<b>ID:</b> <code>{user.id}</code>",
+        f"<b>Type:</b> <code>{user.type}</code>",
+    ]
+    if hasattr(user, "username") and user.username:
+        info_lines.append(f"<b>Username:</b> @{user.username}")
+    if hasattr(user, "first_name"):
+        if hasattr(user, "last_name") and user.last_name:
+            info_lines.append(f"<b>Name:</b> {user.first_name} {user.last_name}")
+        else:
+            info_lines.append(f"<b>Name:</b> {user.first_name}")
+    if hasattr(user, "is_premium"):
+        info_lines.append(f"<b>Premium:</b> {'✅' if user.is_premium else '❌'}")
+    if hasattr(user, "title"):
+        info_lines.append(f"<b>Title:</b> {user.title}")
+    if hasattr(user, "description") and user.description:
+        info_lines.append(f"<b>Description:</b> {user.description}")
+
+    await msg.answer("\n".join(info_lines))
+    await state.clear()
 
 ####################################### - GET INFO - #######################################
 

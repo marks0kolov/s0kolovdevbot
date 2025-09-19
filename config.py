@@ -17,3 +17,5 @@ REQUEST_LABELS: dict[int, str] = {
 class Send_Info(StatesGroup):
     waiting_for_update = State()
     waiting_for_business_update = State()
+class GetUserInfo(StatesGroup):
+        waiting_for_user_id = State()
