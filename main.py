@@ -4,7 +4,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.fsm.storage.memory import MemoryStorage
 
 
-from handlers import masterR, idR, infoR, userR
+from handlers import masterR, idR, infoR
 from config import BOT_TOKEN, PARSE_MODE
 
 storage = MemoryStorage()

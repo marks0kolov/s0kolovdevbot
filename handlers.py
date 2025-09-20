@@ -103,7 +103,6 @@ async def send_chat_id(msg: ttypes.Message):
     text = f"<b>{REQUEST_LABELS[req_id]} id:</b> <code>{chat_id}</code>"
     await msg.answer(text, reply_markup=ttypes.ReplyKeyboardRemove())
 
-
 ####################################### - GET INFO - #######################################
 
 infoR = Router(name="get_info")
