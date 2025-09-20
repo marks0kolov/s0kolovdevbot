@@ -19,7 +19,6 @@ async def main():
     dp.include_router(idR)
     dp.include_router(infoR)
     dp.include_router(masterR)
-    dp.include_router(userR)
 
     await dp.start_polling(bot) # start bot polling
 
